@@ -67,11 +67,11 @@ class SmoothGrad(object):
     def generate(self, idx, filename):
         grads = []
         image = self.image.data.cpu()
-        self.sigma = (image.max() - image.min()) * self.sigma
+        sigma = (image.max() - image.min()) * self.sigma
 
         for i in tqdm(range(self.n_samples)):
             # Add gaussian noises
-            noised_image = image + torch.randn(image.size()) * self.sigma
+            noised_image = image + torch.randn(image.size()) * sigma
             self.image = Variable(
                 noised_image, volatile=False, requires_grad=True)
             self.forward()

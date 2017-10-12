@@ -46,7 +46,7 @@ def main(args):
     prob = smooth_grad.prob
 
     # Generate the saliency images of top 3 classes
-    for i in range(0, 1):
+    for i in range(0, 3):
         print('{:.5f}\t{}'.format(prob[i], classes[idx[i]]))
         filename = 'results/{}'.format(classes[idx[i]])
         img = smooth_grad.generate(filename=filename, idx=idx[i])

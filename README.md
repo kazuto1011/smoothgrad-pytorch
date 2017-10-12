@@ -5,23 +5,23 @@ WIP, not tested on GPU
 
 * Python 2.7
 * PyTorch
+* tqdm
 
 ## Examples
 
 ```bash
-python main.py --image samples/cat_dog.png --no-cuda
+python main.py --image samples/cat_dog.png [--no-cuda] [--guidedbp]
 ```
 
 ![](samples/cat_dog.png)
 
-CNN: ResNet-152<br>
-Noise STD: 0.15<br>
+ResNet-152<br>
+bull mastiff 54.2% @1<br>
 #samples: 50
 
-||bull mastiff|tabby|
-|:-:|:-:|:-:|
-|SmoothGrad|![](results/bull_mastiff.png)|![](results/tabby.png)|
-|Guided Backprop + SmoothGrad|![](results/guided/bull_mastiff.png)|![](results/guided/tabby.png)|
-
+|Noise level (σ)|10%|15%|20%|
+|:-|:-:|:-:|:-:|
+|SmoothGrad|![](samples/bull_mastiff_10.gif)|![](samples/bull_mastiff_15.gif)|![](samples/bull_mastiff_20.gif)|
+|Guided Backprop + SmoothGrad|![](samples/bull_mastiff_10_guided.gif)|![](samples/bull_mastiff_15_guided.gif)|![](samples/bull_mastiff_20_guided.gif)|
 ## References
 \[1\] D. Smikov, N. Thorat, B. Kim, F. Viégas, M. Wattenberg. "SmoothGrad: removing noise by adding noise". arXiv, 2017<br>

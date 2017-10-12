@@ -15,17 +15,18 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn import functional as F
+from tqdm import tqdm
+
 
 class SmoothGrad(object):
 
-    def __init__(self, model, n_class, cuda, sigma=0.15,
+    def __init__(self, model, cuda, sigma=0.20,
                  n_samples=50, guidedbackprop=True):
         self.model = model
         self.model.eval()
         self.cuda = cuda
         if self.cuda:
             self.model.cuda()
-        self.n_class = n_class
         self.sigma = sigma
         self.n_samples = n_samples
         self.probs = None
@@ -66,19 +67,23 @@ class SmoothGrad(object):
     def generate(self, idx, filename):
         grads = []
         image = self.image.data.cpu()
-        for i in range(self.n_samples):
-            print("forward #{}".format(i))
+        self.sigma = (image.max() - image.min()) * self.sigma
+
+        for i in tqdm(range(self.n_samples)):
+            # Add gaussian noises
             noised_image = image + torch.randn(image.size()) * self.sigma
-            self.image = Variable(noised_image, volatile=False, requires_grad=True)
+            self.image = Variable(
+                noised_image, volatile=False, requires_grad=True)
             self.forward()
             self.backward(idx=idx)
             grad = self.image.grad.data.cpu().numpy()
             grads.append(grad)
             self.model.zero_grad()
 
-        grad = np.mean(np.array(grads), axis=0)
-        img = np.max(np.abs(grad), axis=1)[0]
-        img -= img.min()
-        img /= img.max()
-        img = np.uint8(img*255)
-        cv2.imwrite(filename, img)
+            if i % 5 == 0:
+                grad = np.mean(np.array(grads), axis=0)
+                img = np.max(np.abs(grad), axis=1)[0]
+                img -= img.min()
+                img /= img.max()
+                img = np.uint8(img * 255)
+                cv2.imwrite(filename + '_{}.png'.format(i), img)

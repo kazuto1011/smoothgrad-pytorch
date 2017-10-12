@@ -27,32 +27,36 @@ def main(args):
             classes.append(line.strip().split(' ', 1)[
                            1].split(', ', 1)[0].replace(' ', '_'))
 
-    print('Loading a model...')
+    # Setup a classification model
+    print('Loading a model...', end='')
     model = torchvision.models.resnet152(pretrained=True)
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                              std=[0.229, 0.224, 0.225])
     ])
+    print('finished')
 
-    smooth_grad = SmoothGrad(model=model, n_class=1000, cuda=args.cuda, guidedbackprop=True)
+    # Setup the SmoothGrad
+    smooth_grad = SmoothGrad(model=model, cuda=args.cuda,
+                             guidedbackprop=args.guidedbp)
     smooth_grad.load_image(filename=args.image, transform=transform)
     smooth_grad.forward()
-
     idx = smooth_grad.idx
     prob = smooth_grad.prob
 
-    for i in range(0, 5):
-        cls_name = classes[idx[i]]
-        filename = 'results/guided/{}.png'.format(cls_name)
+    # Generate the saliency images of top 3 classes
+    for i in range(0, 1):
+        print('{:.5f}\t{}'.format(prob[i], classes[idx[i]]))
+        filename = 'results/{}'.format(classes[idx[i]])
         img = smooth_grad.generate(filename=filename, idx=idx[i])
-        print('\t{:.5f}\t{}'.format(prob[i], cls_name))
 
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Grad-CAM visualization')
+    parser = argparse.ArgumentParser(description='SmoothGrad visualization')
     parser.add_argument('--no-cuda', action='store_true', default=False)
+    parser.add_argument('--guidedbp', action='store_true', default=False)
     parser.add_argument('--image', type=str, required=True)
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()

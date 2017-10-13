@@ -9,23 +9,20 @@ from __future__ import print_function
 
 import argparse
 
-import cv2
-import numpy as np
 import torchvision
 from torchvision import transforms
-
 from smooth_grad import SmoothGrad
 
 
 def main(args):
 
     # Load the synset words
-    file_name = 'synset_words.txt'
-    classes = list()
-    with open(file_name) as class_file:
-        for line in class_file:
-            classes.append(line.strip().split(' ', 1)[
-                           1].split(', ', 1)[0].replace(' ', '_'))
+    idx2cls = list()
+    with open('samples/synset_words.txt') as lines:
+        for line in lines:
+            line = line.strip().split(' ', 1)[1]
+            line = line.split(', ', 1)[0].replace(' ', '_')
+            idx2cls.append(line)
 
     # Setup a classification model
     print('Loading a model...', end='')
@@ -38,26 +35,28 @@ def main(args):
     print('finished')
 
     # Setup the SmoothGrad
-    smooth_grad = SmoothGrad(model=model, cuda=args.cuda,
-                             guidedbackprop=args.guidedbp)
-    smooth_grad.load_image(filename=args.image, transform=transform)
-    smooth_grad.forward()
-    idx = smooth_grad.idx
-    prob = smooth_grad.prob
+    smooth_grad = SmoothGrad(model=model, cuda=args.cuda, sigma=args.sigma,
+                             n_samples=args.n_samples, guided=args.guided)
 
-    # Generate the saliency images of top 3 classes
+    # Predict without adding noises
+    smooth_grad.load_image(filename=args.image, transform=transform)
+    prob, idx = smooth_grad.forward()
+
+    # Generate the saliency images of top 3
     for i in range(0, 3):
-        print('{:.5f}\t{}'.format(prob[i], classes[idx[i]]))
-        filename = 'results/{}'.format(classes[idx[i]])
-        img = smooth_grad.generate(filename=filename, idx=idx[i])
+        print('{:.5f}\t{}'.format(prob[i], idx2cls[idx[i]]))
+        smooth_grad.generate(
+            filename='results/{}'.format(idx2cls[idx[i]]), idx=idx[i])
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='SmoothGrad visualization')
-    parser.add_argument('--no-cuda', action='store_true', default=False)
-    parser.add_argument('--guidedbp', action='store_true', default=False)
     parser.add_argument('--image', type=str, required=True)
+    parser.add_argument('--sigma', type=float, default=0.20)
+    parser.add_argument('--n_samples', type=int, default=50)
+    parser.add_argument('--no-cuda', action='store_true', default=False)
+    parser.add_argument('--guided', action='store_true', default=False)
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
 

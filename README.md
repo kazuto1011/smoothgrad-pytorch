@@ -1,5 +1,7 @@
 # SmoothGrad with PyTorch
-WIP, not tested on GPU
+
+PyTorch implementation of SmoothGrad [1].
+WIP, not tested on GPU.
 
 ## Dependencies
 
@@ -14,11 +16,13 @@ WIP, not tested on GPU
 python main.py --image samples/cat_dog.png [--no-cuda] [--guided]
 ```
 
+With the ```--guided``` option, you can generate smoothed maps from guided backproped gradients.
+
 ![](samples/cat_dog.png)
 
-ResNet-152<br>
-bull mastiff 54.2% @1<br>
-#samples: 50
+Model: ResNet-152 pre-trained on ImageNet<br>
+Prediction: *bull mastiff* - 54.3% @1<br>
+#samples: 100
 
 |Noise level (σ)|10%|15%|20%|
 |:-|:-:|:-:|:-:|

@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
+from PIL import Image
 from torch.autograd import Variable
 from torch.nn import functional as F
 from tqdm import tqdm
@@ -86,6 +87,6 @@ class SmoothGrad(object):
                 saliency -= saliency.min()
                 saliency /= saliency.max()
                 saliency = np.uint8(saliency * 255)
-                cv2.imwrite(filename + '_{}.png'.format(i), saliency)
+                cv2.imwrite(filename + '_{:04d}.png'.format(i), saliency)
 
             self.model.zero_grad()

@@ -9,9 +9,11 @@ from __future__ import print_function
 
 import argparse
 
+import torch
+
 import torchvision
-from torchvision import transforms
 from smooth_grad import SmoothGrad
+from torchvision import transforms
 
 
 def main(args):
@@ -54,7 +56,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SmoothGrad visualization')
     parser.add_argument('--image', type=str, required=True)
     parser.add_argument('--sigma', type=float, default=0.20)
-    parser.add_argument('--n_samples', type=int, default=50)
+    parser.add_argument('--n_samples', type=int, default=100)
     parser.add_argument('--no-cuda', action='store_true', default=False)
     parser.add_argument('--guided', action='store_true', default=False)
     args = parser.parse_args()
